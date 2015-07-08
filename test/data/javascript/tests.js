@@ -1,3 +1,5 @@
+var inputlib = require('./inputlib');
+
 exports.test_data = {
     default_options: [
         { name: "indent_size", value: "4" },
@@ -315,6 +317,800 @@ exports.test_data = {
                 ],
             },
         ],
+    }, {
+        name: "operator_position option - set to before_newline",
+        options: [
+            { name: "operator_position", value: "'before_newline'" },
+            { name: "preserve_newlines", value: "false" },
+        ],
+        tests: [
+            {
+                comment: 'comprehensive, but simple',
+                input: inputlib.operator_position.comprehensive_simple,
+                output: [
+                    'var res = a +',
+                    '    b -',
+                    '    c /',
+                    '    d *',
+                    '    e %',
+                    '    f;',
+                    'var res = g &',
+                    '    h |',
+                    '    i ^',
+                    '    j;',
+                    'var res = (k &&',
+                    '        l ||',
+                    '        m) ?',
+                    '    n :',
+                    '    o;',
+                    'var res = p >>',
+                    '    q <<',
+                    '    r >>>',
+                    '    s;',
+                    'var res = t ===',
+                    '    u !==',
+                    '    v !=',
+                    '    w ==',
+                    '    x >=',
+                    '    y <=',
+                    '    z >',
+                    '    aa <',
+                    '    bb;'
+                ]
+            }, {
+                comment: 'comprehensive, various newlines',
+                input: inputlib.operator_position.comprehensive_newlines,
+                output: [
+                    'var res = a +',
+                    '    b -',
+                    '    c /',
+                    '    d *',
+                    '    e %',
+                    '    f;',
+                    'var res = g &',
+                    '    h |',
+                    '    i ^',
+                    '    j;',
+                    'var res = (k &&',
+                    '        l ||',
+                    '        m) ?',
+                    '    n :',
+                    '    o;',
+                    'var res = p >>',
+                    '    q <<',
+                    '    r >>>',
+                    '    s;',
+                    'var res = t ===',
+                    '    u !==',
+                    '    v !=',
+                    '    w ==',
+                    '    x >=',
+                    '    y <=',
+                    '    z >',
+                    '    aa <',
+                    '    bb;'
+                ]
+            }, {
+                comment: 'handle colon special case',
+                input: inputlib.operator_position.colon_special_case,
+                output: [
+                    'var a = {',
+                    '    b: bval,',
+                    '    c: cval',
+                    '};',
+                    'var d = e ?',
+                    '    f :',
+                    '    g;'
+                ]
+            }, {
+                comment: 'catch-all, includes brackets and other various code',
+                input: inputlib.operator_position.catch_all,
+                output: [
+                    'var d = 1;',
+                    'if (a ===',
+                    '    b &&',
+                    '    c) {',
+                    '    d = (c *',
+                    '            everything /',
+                    '            something_else) %',
+                    '        b;',
+                    '    e += d;',
+                    '} else if (!(complex &&',
+                    '        simple) ||',
+                    '    (emotion &&',
+                    '        emotion.name ===',
+                    '        "happy")) {',
+                    '    cryTearsOfJoy(many ||',
+                    '        anOcean ||',
+                    '        aRiver);',
+                    '}'
+                ]
+            }
+        ]
+    }, {
+        name: "operator_position option - set to before_newline",
+        options: [
+            { name: "operator_position", value: "'before_newline'" },
+            { name: "preserve_newlines", value: "true" },
+        ],
+        tests: [
+            {
+                comment: 'comprehensive, but simple',
+                input: inputlib.operator_position.comprehensive_simple,
+                output: [
+                    'var res = a +',
+                    '    b -',
+                    '    c /',
+                    '    d *',
+                    '    e %',
+                    '    f;',
+                    'var res = g &',
+                    '    h |',
+                    '    i ^',
+                    '    j;',
+                    'var res = (k &&',
+                    '        l ||',
+                    '        m) ?',
+                    '    n :',
+                    '    o;',
+                    'var res = p >>',
+                    '    q <<',
+                    '    r >>>',
+                    '    s;',
+                    'var res = t ===',
+                    '    u !==',
+                    '    v !=',
+                    '    w ==',
+                    '    x >=',
+                    '    y <=',
+                    '    z >',
+                    '    aa <',
+                    '    bb;'
+                ]
+            }, {
+                comment: 'comprehensive, various newlines',
+                input: inputlib.operator_position.comprehensive_newlines,
+                output: [
+                    'var res = a +',
+                    '    b -',
+                    '    c /',
+                    '    d *',
+                    '    e %',
+                    '    f;',
+                    'var res = g &',
+                    '    h |',
+                    '    i ^',
+                    '    j;',
+                    'var res = (k &&',
+                    '        l ||',
+                    '        m) ?',
+                    '    n :',
+                    '    o;',
+                    'var res = p >>',
+                    '    q <<',
+                    '    r >>>',
+                    '    s;',
+                    'var res = t',
+                    '',
+                    '    ===',
+                    '    u !==',
+                    '    v !=',
+                    '    w ==',
+                    '    x >=',
+                    '    y <=',
+                    '    z >',
+                    '    aa <',
+                    '    bb;'
+                ]
+            }, {
+                comment: 'handle colon special case',
+                input: inputlib.operator_position.colon_special_case,
+                output: [
+                    'var a = {',
+                    '    b: bval,',
+                    '    c: cval',
+                    '};',
+                    'var d = e ?',
+                    '    f :',
+                    '    g;'
+                ]
+            }, {
+                comment: 'catch-all, includes brackets and other various code',
+                input: inputlib.operator_position.catch_all,
+                output: [
+                    'var d = 1;',
+                    'if (a ===',
+                    '    b &&',
+                    '    c) {',
+                    '    d = (c *',
+                    '            everything /',
+                    '            something_else) %',
+                    '        b;',
+                    '    e',
+                    '        += d;',
+                    '',
+                    '} else if (!(complex &&',
+                    '        simple) ||',
+                    '    (emotion &&',
+                    '        emotion.name ===',
+                    '        "happy")) {',
+                    '    cryTearsOfJoy(many ||',
+                    '        anOcean ||',
+                    '        aRiver);',
+                    '}'
+                ]
+            }
+        ]
+    }, {
+        name: "operator_position option - set to after_newline",
+        options: [
+            { name: "operator_position", value: "'after_newline'" },
+            { name: "preserve_newlines", value: "false" },
+        ],
+        tests: [
+            {
+                comment: 'comprehensive, but simple',
+                input: inputlib.operator_position.comprehensive_simple,
+                output: [
+                    'var res = a',
+                    '    + b',
+                    '    - c',
+                    '    / d',
+                    '    * e',
+                    '    % f;',
+                    'var res = g',
+                    '    & h',
+                    '    | i',
+                    '    ^ j;',
+                    'var res = (k',
+                    '        && l',
+                    '        || m)',
+                    '    ? n',
+                    '    : o;',
+                    'var res = p',
+                    '    >> q',
+                    '    << r',
+                    '    >>> s;',
+                    'var res = t',
+                    '    === u',
+                    '    !== v',
+                    '    != w',
+                    '    == x',
+                    '    >= y',
+                    '    <= z',
+                    '    > aa',
+                    '    < bb;'
+                ]
+            }, {
+                comment: 'comprehensive, various newlines',
+                input: inputlib.operator_position.comprehensive_newlines,
+                output: [
+                    'var res = a',
+                    '    + b',
+                    '    - c',
+                    '    / d',
+                    '    * e',
+                    '    % f;',
+                    'var res = g',
+                    '    & h',
+                    '    | i',
+                    '    ^ j;',
+                    'var res = (k',
+                    '        && l',
+                    '        || m)',
+                    '    ? n',
+                    '    : o;',
+                    'var res = p',
+                    '    >> q',
+                    '    << r',
+                    '    >>> s;',
+                    'var res = t',
+                    '    === u',
+                    '    !== v',
+                    '    != w',
+                    '    == x',
+                    '    >= y',
+                    '    <= z',
+                    '    > aa',
+                    '    < bb;'
+                ]
+            }, {
+                comment: 'handle colon special case',
+                input: inputlib.operator_position.colon_special_case,
+                output: [
+                    'var a = {',
+                    '    b: bval,',
+                    '    c: cval',
+                    '};',
+                    'var d = e',
+                    '    ? f',
+                    '    : g;'
+                ]
+            }, {
+                comment: 'catch-all, includes brackets and other various code',
+                input: inputlib.operator_position.catch_all,
+                output: [
+                    'var d = 1;',
+                    'if (a',
+                    '    === b',
+                    '    && c) {',
+                    '    d = (c',
+                    '            * everything',
+                    '            / something_else)',
+                    '        % b;',
+                    '    e += d;',
+                    '} else if (!(complex',
+                    '        && simple)',
+                    '    || (emotion',
+                    '        && emotion.name',
+                    '        === "happy")) {',
+                    '    cryTearsOfJoy(many',
+                    '        || anOcean',
+                    '        || aRiver);',
+                    '}'
+                ]
+            }
+        ]
+    }, {
+        name: "operator_position option - set to after_newline",
+        options: [
+            { name: "operator_position", value: "'after_newline'" },
+            { name: "preserve_newlines", value: "true" },
+        ],
+        tests: [
+            {
+                comment: 'comprehensive, but simple',
+                input: inputlib.operator_position.comprehensive_simple,
+                output: [
+                    'var res = a',
+                    '    + b',
+                    '    - c',
+                    '    / d',
+                    '    * e',
+                    '    % f;',
+                    'var res = g',
+                    '    & h',
+                    '    | i',
+                    '    ^ j;',
+                    'var res = (k',
+                    '        && l',
+                    '        || m)',
+                    '    ? n',
+                    '    : o;',
+                    'var res = p',
+                    '    >> q',
+                    '    << r',
+                    '    >>> s;',
+                    'var res = t',
+                    '    === u',
+                    '    !== v',
+                    '    != w',
+                    '    == x',
+                    '    >= y',
+                    '    <= z',
+                    '    > aa',
+                    '    < bb;'
+                ]
+            }, {
+                comment: 'comprehensive, various newlines',
+                input: inputlib.operator_position.comprehensive_newlines,
+                output: [
+                    'var res = a',
+                    '    + b',
+                    '    - c',
+                    '    /',
+                    '    d',
+                    '    * e',
+                    '    %',
+                    '    f;',
+                    'var res = g',
+                    '    & h',
+                    '    | i',
+                    '    ^',
+                    '    j;',
+                    'var res = (k',
+                    '        &&',
+                    '        l',
+                    '        || m)',
+                    '    ?',
+                    '    n',
+                    '    : o;',
+                    'var res = p',
+                    '    >> q',
+                    '    <<',
+                    '    r',
+                    '    >>> s;',
+                    'var res = t',
+                    '',
+                    '    === u',
+                    '    !== v',
+                    '    !=',
+                    '    w',
+                    '    == x',
+                    '    >=',
+                    '    y',
+                    '    <= z',
+                    '    > aa',
+                    '    <',
+                    '    bb;'
+                ]
+            }, {
+                comment: 'handle colon special case',
+                input: inputlib.operator_position.colon_special_case,
+                output: [
+                    'var a = {',
+                    '    b: bval,',
+                    '    c: cval',
+                    '};',
+                    'var d = e',
+                    '    ? f',
+                    '    : g;'
+                ]
+            }, {
+                comment: 'catch-all, includes brackets and other various code',
+                input: inputlib.operator_position.catch_all,
+                output: [
+                    'var d = 1;',
+                    'if (a',
+                    '    === b',
+                    '    && c) {',
+                    '    d = (c',
+                    '            * everything',
+                    '            / something_else)',
+                    '        %',
+                    '        b;',
+                    '    e',
+                    '        += d;',
+                    '',
+                    '} else if (!(complex',
+                    '        && simple)',
+                    '    ||',
+                    '    (emotion',
+                    '        && emotion.name',
+                    '        === "happy")) {',
+                    '    cryTearsOfJoy(many',
+                    '        ||',
+                    '        anOcean',
+                    '        ||',
+                    '        aRiver);',
+                    '}'
+                ]
+            }
+        ]
+    }, {
+        name: "operator_position option - set to preserve_newline",
+        options: [
+            { name: "operator_position", value: "'preserve_newline'" },
+            { name: "preserve_newlines", value: "false" },
+        ],
+        tests: [
+            {
+                comment: 'comprehensive, but simple',
+                unchanged: inputlib.operator_position.comprehensive_simple
+            }, {
+                comment: 'comprehensive, various newlines',
+                input: inputlib.operator_position.comprehensive_newlines,
+                output: [
+                    'var res = a + b',
+                    '    - c /',
+                    '    d * e',
+                    '    %',
+                    '    f;',
+                    'var res = g & h',
+                    '    | i ^',
+                    '    j;',
+                    'var res = (k &&',
+                    '        l',
+                    '        || m) ?',
+                    '    n',
+                    '    : o;',
+                    'var res = p',
+                    '    >> q <<',
+                    '    r',
+                    '    >>> s;',
+                    'var res = t',
+                    '    === u !== v',
+                    '    !=',
+                    '    w',
+                    '    == x >=',
+                    '    y <= z > aa <',
+                    '    bb;'
+                ]
+            }, {
+                comment: 'handle colon special case',
+                input: inputlib.operator_position.colon_special_case,
+                output: [
+                    'var a = {',
+                    '    b: bval,',
+                    '    c: cval',
+                    '};',
+                    'var d = e ? f : g;'
+                ]
+            }, {
+                comment: 'catch-all, includes brackets and other various code',
+                input: inputlib.operator_position.catch_all,
+                output: [
+                    'var d = 1;',
+                    'if (a === b',
+                    '    && c) {',
+                    '    d = (c * everything',
+                    '            / something_else) %',
+                    '        b;',
+                    '    e += d;',
+                    '} else if (!(complex && simple) ||',
+                    '    (emotion && emotion.name === "happy")) {',
+                    '    cryTearsOfJoy(many ||',
+                    '        anOcean ||',
+                    '        aRiver);',
+                    '}'
+                ]
+            }
+        ]
+    }, {
+        name: "operator_position option - set to preserve_newline",
+        options: [
+            { name: "operator_position", value: "'preserve_newline'" },
+            { name: "preserve_newlines", value: "true" },
+        ],
+        tests: [
+            {
+                comment: 'comprehensive, but simple',
+                unchanged: inputlib.operator_position.comprehensive_simple
+            }, {
+                comment: 'comprehensive, various newlines',
+                input: inputlib.operator_position.comprehensive_newlines,
+                output: [
+                    'var res = a + b',
+                    '    - c /',
+                    '    d * e',
+                    '    %',
+                    '    f;',
+                    'var res = g & h',
+                    '    | i ^',
+                    '    j;',
+                    'var res = (k &&',
+                    '        l',
+                    '        || m) ?',
+                    '    n',
+                    '    : o;',
+                    'var res = p',
+                    '    >> q <<',
+                    '    r',
+                    '    >>> s;',
+                    'var res = t',
+                    '',
+                    '    === u !== v',
+                    '    !=',
+                    '    w',
+                    '    == x >=',
+                    '    y <= z > aa <',
+                    '    bb;'
+                ]
+            }, {
+                comment: 'handle colon special case',
+                input: inputlib.operator_position.colon_special_case,
+                output: [
+                    'var a = {',
+                    '    b: bval,',
+                    '    c: cval',
+                    '};',
+                    'var d = e ? f : g;'
+                ]
+            }, {
+                comment: 'catch-all, includes brackets and other various code',
+                unchanged: inputlib.operator_position.catch_all
+            }
+        ]
+    }, {
+        name: "operator_position option - set to preserve_newline",
+        options: [
+            { name: "operator_position", value: "'remove_newline'" },
+            { name: "preserve_newlines", value: "false" },
+        ],
+        tests: [
+            {
+                comment: 'comprehensive, but simple',
+                unchanged: inputlib.operator_position.comprehensive_simple
+            }, {
+                comment: 'comprehensive, various newlines',
+                input: inputlib.operator_position.comprehensive_newlines,
+                output: [
+                    'var res = a + b - c / d * e % f;',
+                    'var res = g & h | i ^ j;',
+                    'var res = (k && l || m) ? n : o;',
+                    'var res = p >> q << r >>> s;',
+                    'var res = t === u !== v != w == x >= y <= z > aa < bb;'
+                ]
+            }, {
+                comment: 'handle colon special case',
+                input: inputlib.operator_position.colon_special_case,
+                output: [
+                    'var a = {',
+                    '    b: bval,',
+                    '    c: cval',
+                    '};',
+                    'var d = e ? f : g;'
+                ]
+            }, {
+                comment: 'catch-all, includes brackets and other various code',
+                input: inputlib.operator_position.catch_all,
+                output: [
+                    'var d = 1;',
+                    'if (a === b && c) {',
+                    '    d = (c * everything / something_else) % b;',
+                    '    e += d;',
+                    '} else if (!(complex && simple) || (emotion && emotion.name === "happy")) {',
+                    '    cryTearsOfJoy(many || anOcean || aRiver);',
+                    '}'
+                ]
+            }
+        ]
+    }, {
+        name: "operator_position option - set to preserve_newline",
+        options: [
+            { name: "operator_position", value: "'remove_newline'" },
+            { name: "preserve_newlines", value: "true" },
+        ],
+        tests: [
+            {
+                comment: 'comprehensive, but simple',
+                unchanged: inputlib.operator_position.comprehensive_simple
+            }, {
+                comment: 'comprehensive, various newlines',
+                input: inputlib.operator_position.comprehensive_newlines,
+                output: [
+                    'var res = a + b - c /',
+                    '    d * e %',
+                    '    f;',
+                    'var res = g & h | i ^',
+                    '    j;',
+                    'var res = (k &&',
+                    '        l || m) ?',
+                    '    n : o;',
+                    'var res = p >> q <<',
+                    '    r >>> s;',
+                    'var res = t',
+                    '',
+                    '    === u !== v !=',
+                    '    w == x >=',
+                    '    y <= z > aa <',
+                    '    bb;'
+                ]
+            }, {
+                comment: 'handle colon special case',
+                input: inputlib.operator_position.colon_special_case,
+                output: [
+                    'var a = {',
+                    '    b: bval,',
+                    '    c: cval',
+                    '};',
+                    'var d = e ? f : g;'
+                ]
+            }, {
+                comment: 'catch-all, includes brackets and other various code',
+                input: inputlib.operator_position.catch_all,
+                output: [
+                    'var d = 1;',
+                    'if (a === b && c) {',
+                    '    d = (c * everything / something_else) %',
+                    '        b;',
+                    '    e',
+                    '        += d;',
+                    '',
+                    '} else if (!(complex && simple) ||',
+                    '    (emotion && emotion.name === "happy")) {',
+                    '    cryTearsOfJoy(many ||',
+                    '        anOcean ||',
+                    '        aRiver);',
+                    '}'
+                ]
+            }
+        ]
+    }, {
+        name: "operator_position option - set to default (undefined)",
+        options: [
+            { name: "operator_position", value: "undefined" },
+            { name: "preserve_newlines", value: "false" },
+        ],
+        tests: [
+            {
+                comment: 'comprehensive, but simple',
+                unchanged: inputlib.operator_position.comprehensive_simple
+            }, {
+                comment: 'comprehensive, various newlines',
+                input: inputlib.operator_position.comprehensive_newlines,
+                output: [
+                    'var res = a + b - c / d * e % f;',
+                    'var res = g & h | i ^ j;',
+                    'var res = (k && l || m) ? n : o;',
+                    'var res = p >> q << r >>> s;',
+                    'var res = t === u !== v != w == x >= y <= z > aa < bb;'
+                ]
+            }, {
+                comment: 'catch-all, includes brackets and other various code',
+                input: inputlib.operator_position.colon_special_case,
+                output: [
+                    'var a = {',
+                    '    b: bval,',
+                    '    c: cval',
+                    '};',
+                    'var d = e ? f : g;'
+                ]
+            }, {
+                comment: 'handle colon special case',
+                input: inputlib.operator_position.catch_all,
+                output: [
+                    'var d = 1;',
+                    'if (a === b && c) {',
+                    '    d = (c * everything / something_else) % b;',
+                    '    e += d;',
+                    '} else if (!(complex && simple) || (emotion && emotion.name === "happy")) {',
+                    '    cryTearsOfJoy(many || anOcean || aRiver);',
+                    '}'
+                ]
+            }
+        ]
+    }, {
+        name: "operator_position option - set to default (undefined)",
+        options: [
+            { name: "operator_position", value: "undefined" },
+            { name: "preserve_newlines", value: "true" },
+        ],
+        tests: [
+            {
+                comment: 'comprehensive, but simple',
+                unchanged: inputlib.operator_position.comprehensive_simple
+            }, {
+                comment: 'comprehensive, various newlines',
+                input: inputlib.operator_position.comprehensive_newlines,
+                output: [
+                    'var res = a + b - c /',
+                    '    d * e %',
+                    '    f;',
+                    'var res = g & h | i ^',
+                    '    j;',
+                    'var res = (k &&',
+                    '        l || m) ?',
+                    '    n : o;',
+                    'var res = p >> q <<',
+                    '    r >>> s;',
+                    'var res = t',
+                    '',
+                    '    === u !== v !=',
+                    '    w == x >=',
+                    '    y <= z > aa <',
+                    '    bb;'
+                ]
+            }, {
+                comment: 'catch-all, includes brackets and other various code',
+                input: inputlib.operator_position.colon_special_case,
+                output: [
+                    'var a = {',
+                    '    b: bval,',
+                    '    c: cval',
+                    '};',
+                    'var d = e ? f : g;'
+                ]
+            }, {
+                comment: 'handle colon special case',
+                input: inputlib.operator_position.catch_all,
+                output: [
+                    'var d = 1;',
+                    'if (a === b && c) {',
+                    '    d = (c * everything / something_else) %',
+                    '        b;',
+                    '    e',
+                    '        += d;',
+                    '',
+                    '} else if (!(complex && simple) ||',
+                    '    (emotion && emotion.name === "happy")) {',
+                    '    cryTearsOfJoy(many ||',
+                    '        anOcean ||',
+                    '        aRiver);',
+                    '}'
+                ]
+            }
+        ]
     }, {
         name: "New Test Suite"
     },

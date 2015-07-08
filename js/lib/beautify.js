@@ -178,6 +178,27 @@
         var beautifier = new Beautifier(js_source_text, options);
         return beautifier.beautify();
     }
+    
+    function verifyOperatorPosition(opPosition) {
+        var validPositionValues = [undefined];
+        Object.keys(OPERATOR_POSITION).forEach(function(pos) {
+            validPositionValues.push(OPERATOR_POSITION[pos]);
+        });
+        
+        if (!in_array(opPosition, validPositionValues)) {
+            throw new Error("Invalid Option Value: The option 'operator_position' must be one of the following values\n"
+                + validPositionValues
+                + "\nYou passed in '" + opPosition + "'");
+        }
+    }
+    
+    var OPERATOR_POSITION = {
+        before_newline: 'before_newline',
+        after_newline: 'after_newline',
+        preserve_newline: 'preserve_newline',
+        remove_newline: 'remove_newline'
+    };
+    var OP_POSITION_OPERATORS = ['>>>', '===', '!==', '!=', '==', '>=', '<=', '>>', '<<', '&&', '||', '>', '<', '+', '-', '*', '/', '%', '&', '|', '^', '?', ':'];
 
     var MODE = {
             BlockStatement: 'BlockStatement', // 'BLOCK'
@@ -288,6 +309,10 @@
         opt.e4x = (options.e4x === undefined) ? false : options.e4x;
         opt.end_with_newline = (options.end_with_newline === undefined) ? false : options.end_with_newline;
         opt.comma_first = (options.comma_first === undefined) ? false : options.comma_first;
+        opt.operator_position = options.operator_position;
+        
+        // throws error if invalid value was passed in
+        verifyOperatorPosition(opt.operator_position);
 
         // For testing of beautify ignore:start directive
         opt.test_output_raw = (options.test_output_raw === undefined) ? false : options.test_output_raw;
@@ -440,7 +465,11 @@
                 return
             }
 
-            if ((opt.preserve_newlines && current_token.wanted_newline) || force_linewrap) {
+            var shouldPreserveOperatorNewline = (opt.operator_position === OPERATOR_POSITION.preserve_newline) &&
+                in_array(flags.last_text, OP_POSITION_OPERATORS) ||
+                in_array(current_token.text, OP_POSITION_OPERATORS);
+                
+            if (((opt.preserve_newlines || shouldPreserveOperatorNewline) && current_token.wanted_newline) || force_linewrap) {
                 print_newline(false, true);
             } else if (opt.wrap_line_length) {
                 if (last_type === 'TK_RESERVED' && in_array(flags.last_text, newline_restricted_tokens)) {
@@ -1185,6 +1214,12 @@
                 return;
             }
 
+            if (current_token.text === '::') {
+                // no spaces around exotic namespacing syntax operator
+                print_token();
+                return;
+            }
+
             if (current_token.text === ':' && flags.in_case) {
                 flags.case_body = true;
                 indent();
@@ -1193,20 +1228,93 @@
                 flags.in_case = false;
                 return;
             }
+            
+            var space_before = true;
+            var space_after = true;
+            var in_ternary = false;
+                
+            if (current_token.text === ':') {
+                if (flags.ternary_depth === 0) {
+                    // Colon is invalid javascript outside of ternary and object, but do our best to guess what was meant.
+                    space_before = false;
+                } else {
+                    flags.ternary_depth -= 1;
+                    in_ternary = true;
+                }
+            } else if (current_token.text === '?') {
+                flags.ternary_depth += 1;
+            }
+            
+            // let's handle the operator_position option prior to any conflicting logic
+            if (typeof opt.operator_position !== 'undefined' && in_array(current_token.text, OP_POSITION_OPERATORS)) {
+                var isColon = current_token.text === ':';
+                var isTernaryColon = (isColon && in_ternary);
+                var isOtherColon = (isColon && !in_ternary);
+                
+                switch (opt.operator_position) {
+                    case OPERATOR_POSITION.preserve_newline:
+                        if (!isOtherColon) {
+                            allow_wrap_or_preserved_newline();
+                        }
+                        
+                        // if we just added a newline, or the current token is : and it's not a ternary statement,
+                        //   then we set space_before to false
+                        space_before = !(output.just_added_newline() || isOtherColon);
+                        
+                        output.space_before_token = space_before
+                        print_token();
+                        output.space_before_token = true;
+                        return;
+                        break;
+                        
+                    case OPERATOR_POSITION.before_newline:
+                        // if the current token is : and it's not a ternary statement then we set space_before to false
+                        output.space_before_token = !isOtherColon;
+                                          
+                        print_token();
+                        
+                        // if the current token is anything but colon, or (via deduction) it's a colon and in a ternary statement,
+                        //   then print a newline.
+                        if (!isColon || isTernaryColon) {
+                            print_newline(false, true);
+                        } else {
+                            output.space_before_token = true;
+                        }
+                        return;
+                        break;
+                        
+                    case OPERATOR_POSITION.after_newline:
+                        // if the current token is anything but colon, or (via deduction) it's a colon and in a ternary statement,
+                        //   then print a newline.
+                        if (!isColon || isTernaryColon) {
+                            print_newline(false, true);
+                        } else {
+                            output.space_before_token = false;
+                        }
 
-            if (current_token.text === '::') {
-                // no spaces around exotic namespacing syntax operator
-                print_token();
-                return;
+                        print_token();
+
+                        output.space_before_token = true;
+                        return;
+                        break;
+                        
+                    case OPERATOR_POSITION.remove_newline:
+                        // if the current token is a colon and not in a ternary statement,
+                        //   then don't output a space before the token.
+                        output.space_before_token = !isOtherColon;
+
+                        print_token();
+
+                        output.space_before_token = true;
+                        return;
+                        break;
+                }
             }
 
             // Allow line wrapping between operators
             if (last_type === 'TK_OPERATOR') {
                 allow_wrap_or_preserved_newline();
             }
-
-            var space_before = true;
-            var space_after = true;
 
             if (in_array(current_token.text, ['--', '++', '!', '~']) || (in_array(current_token.text, ['-', '+']) && (in_array(last_type, ['TK_START_BLOCK', 'TK_START_EXPR', 'TK_EQUALS', 'TK_OPERATOR']) || in_array(flags.last_text, Tokenizer.line_starters) || flags.last_text === ','))) {
                 // unary operators (and binary +/- pretending to be unary) special cases
@@ -1250,15 +1358,6 @@
                     // foo(); --bar;
                     print_newline();
                 }
-            } else if (current_token.text === ':') {
-                if (flags.ternary_depth === 0) {
-                    // Colon is invalid javascript outside of ternary and object, but do our best to guess what was meant.
-                    space_before = false;
-                } else {
-                    flags.ternary_depth -= 1;
-                }
-            } else if (current_token.text === '?') {
-                flags.ternary_depth += 1;
             } else if (current_token.text === '*' && last_type === 'TK_RESERVED' && flags.last_text === 'function') {
                 space_before = false;
                 space_after = false;
@@ -1273,9 +1372,7 @@
                 output.add_raw_token(current_token)
                 if (current_token.directives && current_token.directives['preserve'] === 'end') {
                     // If we're testing the raw output behavior, do not allow a directive to turn it off.
-                    if (!opt.test_output_raw) {
-                        output.raw = false;
-                    }
+                    output.raw = opt.test_output_raw;
                 }
                 return;
             }
@@ -1308,12 +1405,8 @@
             // block comment starts with a new line
             print_newline(false, true);
             if (lines.length > 1) {
-                if (all_lines_start_with(lines.slice(1), '*')) {
-                    javadoc = true;
-                }
-                else if (each_line_matches_indent(lines.slice(1), lastIndent)) {
-                    starless = true;
-                }
+                javadoc = all_lines_start_with(lines.slice(1), '*');
+                starless = each_line_matches_indent(lines.slice(1), lastIndent);
             }
 
             // first line always indented
