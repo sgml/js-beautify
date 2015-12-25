@@ -259,6 +259,7 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
     {
         sanitytest = test_obj;
 
+        opts.operator_position = 'before_newline';
 
         reset_options();
         //============================================================
@@ -398,7 +399,7 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
             '    , age: 25\n' +
             '});');
 
-
+        // operator_position option - ensure no neswlines if preserve_newlines is false - ()
         reset_options();
         //============================================================
         // Space in parens tests - (s = "", e = "")
@@ -428,47 +429,15 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
             '        dest: "www/gui/build"\n' +
             '    }]\n' +
             '}');
-        // operator_position option - set to before_newline
         opts.operator_position = 'before_newline';
         opts.preserve_newlines = false;
-        
-        // comprehensive, but simple
         bt(
             'var res = a + b - c / d * e % f;\n' +
             'var res = g & h | i ^ j;\n' +
             'var res = (k && l || m) ? n : o;\n' +
             'var res = p >> q << r >>> s;\n' +
-            'var res = t === u !== v != w == x >= y <= z > aa < bb;',
-            'var res = a +\n' +
-            '    b -\n' +
-            '    c /\n' +
-            '    d *\n' +
-            '    e %\n' +
-            '    f;\n' +
-            'var res = g &\n' +
-            '    h |\n' +
-            '    i ^\n' +
-            '    j;\n' +
-            'var res = (k &&\n' +
-            '        l ||\n' +
-            '        m) ?\n' +
-            '    n :\n' +
-            '    o;\n' +
-            'var res = p >>\n' +
-            '    q <<\n' +
-            '    r >>>\n' +
-            '    s;\n' +
-            'var res = t ===\n' +
-            '    u !==\n' +
-            '    v !=\n' +
-            '    w ==\n' +
-            '    x >=\n' +
-            '    y <=\n' +
-            '    z >\n' +
-            '    aa <\n' +
-            '    bb;');
-        
-        // comprehensive, various newlines
+            'var res = t === u !== v != w == x >= y <= z > aa < ab;\n' +
+            'ac + -ad');
         bt(
             'var res = a + b\n' +
             '- c /\n' +
@@ -496,285 +465,119 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
             'w\n' +
             '== x >=\n' +
             'y <= z > aa <\n' +
-            'bb;',
-            'var res = a +\n' +
-            '    b -\n' +
-            '    c /\n' +
-            '    d *\n' +
-            '    e %\n' +
-            '    f;\n' +
-            'var res = g &\n' +
-            '    h |\n' +
-            '    i ^\n' +
-            '    j;\n' +
-            'var res = (k &&\n' +
-            '        l ||\n' +
-            '        m) ?\n' +
-            '    n :\n' +
-            '    o;\n' +
-            'var res = p >>\n' +
-            '    q <<\n' +
-            '    r >>>\n' +
-            '    s;\n' +
-            'var res = t ===\n' +
-            '    u !==\n' +
-            '    v !=\n' +
-            '    w ==\n' +
-            '    x >=\n' +
-            '    y <=\n' +
-            '    z >\n' +
-            '    aa <\n' +
-            '    bb;');
-        
-        // handle colon special case
-        bt(
-            'var a = {\n' +
-            '    b\n' +
-            ': bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;',
-            'var a = {\n' +
-            '    b: bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ?\n' +
-            '    f :\n' +
-            '    g;');
-        
-        // catch-all, includes brackets and other various code
-        bt(
-            'var d = 1;\n' +
-            'if (a === b\n' +
-            '    && c) {\n' +
-            '    d = (c * everything\n' +
-            '            / something_else) %\n' +
-            '        b;\n' +
-            '    e\n' +
-            '        += d;\n' +
-            '\n' +
-            '} else if (!(complex && simple) ||\n' +
-            '    (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}',
-            'var d = 1;\n' +
-            'if (a ===\n' +
-            '    b &&\n' +
-            '    c) {\n' +
-            '    d = (c *\n' +
-            '            everything /\n' +
-            '            something_else) %\n' +
-            '        b;\n' +
-            '    e += d;\n' +
-            '} else if (!(complex &&\n' +
-            '        simple) ||\n' +
-            '    (emotion &&\n' +
-            '        emotion.name ===\n' +
-            '        "happy")) {\n' +
-            '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}');
-
-
-
-        // operator_position option - set to before_newline
-        opts.operator_position = 'before_newline';
-        opts.preserve_newlines = true;
-        
-        // comprehensive, but simple
-        bt(
+            'ab;\n' +
+            'ac +\n' +
+            '-ad',
             'var res = a + b - c / d * e % f;\n' +
             'var res = g & h | i ^ j;\n' +
             'var res = (k && l || m) ? n : o;\n' +
             'var res = p >> q << r >>> s;\n' +
-            'var res = t === u !== v != w == x >= y <= z > aa < bb;',
-            'var res = a +\n' +
-            '    b -\n' +
-            '    c /\n' +
-            '    d *\n' +
-            '    e %\n' +
-            '    f;\n' +
-            'var res = g &\n' +
-            '    h |\n' +
-            '    i ^\n' +
-            '    j;\n' +
-            'var res = (k &&\n' +
-            '        l ||\n' +
-            '        m) ?\n' +
-            '    n :\n' +
-            '    o;\n' +
-            'var res = p >>\n' +
-            '    q <<\n' +
-            '    r >>>\n' +
-            '    s;\n' +
-            'var res = t ===\n' +
-            '    u !==\n' +
-            '    v !=\n' +
-            '    w ==\n' +
-            '    x >=\n' +
-            '    y <=\n' +
-            '    z >\n' +
-            '    aa <\n' +
-            '    bb;');
-        
-        // comprehensive, various newlines
-        bt(
-            'var res = a + b\n' +
-            '- c /\n' +
-            'd  *     e\n' +
-            '%\n' +
-            'f;\n' +
-            '   var res = g & h\n' +
-            '| i ^\n' +
-            'j;\n' +
-            'var res = (k &&\n' +
-            'l\n' +
-            '|| m) ?\n' +
-            'n\n' +
-            ': o\n' +
-            ';\n' +
-            'var res = p\n' +
-            '>> q <<\n' +
-            'r\n' +
-            '>>> s;\n' +
-            'var res\n' +
-            '  = t\n' +
-            '\n' +
-            ' === u !== v\n' +
-            ' !=\n' +
-            'w\n' +
-            '== x >=\n' +
-            'y <= z > aa <\n' +
-            'bb;',
-            'var res = a +\n' +
-            '    b -\n' +
-            '    c /\n' +
-            '    d *\n' +
-            '    e %\n' +
-            '    f;\n' +
-            'var res = g &\n' +
-            '    h |\n' +
-            '    i ^\n' +
-            '    j;\n' +
-            'var res = (k &&\n' +
-            '        l ||\n' +
-            '        m) ?\n' +
-            '    n :\n' +
-            '    o;\n' +
-            'var res = p >>\n' +
-            '    q <<\n' +
-            '    r >>>\n' +
-            '    s;\n' +
-            'var res = t\n' +
-            '\n' +
-            '    ===\n' +
-            '    u !==\n' +
-            '    v !=\n' +
-            '    w ==\n' +
-            '    x >=\n' +
-            '    y <=\n' +
-            '    z >\n' +
-            '    aa <\n' +
-            '    bb;');
-        
-        // handle colon special case
-        bt(
-            'var a = {\n' +
-            '    b\n' +
-            ': bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;',
-            'var a = {\n' +
-            '    b: bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ?\n' +
-            '    f :\n' +
-            '    g;');
-        
-        // catch-all, includes brackets and other various code
-        bt(
-            'var d = 1;\n' +
-            'if (a === b\n' +
-            '    && c) {\n' +
-            '    d = (c * everything\n' +
-            '            / something_else) %\n' +
-            '        b;\n' +
-            '    e\n' +
-            '        += d;\n' +
-            '\n' +
-            '} else if (!(complex && simple) ||\n' +
-            '    (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}',
-            'var d = 1;\n' +
-            'if (a ===\n' +
-            '    b &&\n' +
-            '    c) {\n' +
-            '    d = (c *\n' +
-            '            everything /\n' +
-            '            something_else) %\n' +
-            '        b;\n' +
-            '    e\n' +
-            '        += d;\n' +
-            '\n' +
-            '} else if (!(complex &&\n' +
-            '        simple) ||\n' +
-            '    (emotion &&\n' +
-            '        emotion.name ===\n' +
-            '        "happy")) {\n' +
-            '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}');
-
-
-
-        // operator_position option - set to after_newline
+            'var res = t === u !== v != w == x >= y <= z > aa < ab;\n' +
+            'ac + -ad');
+    
+        // operator_position option - ensure no neswlines if preserve_newlines is false - ()
         opts.operator_position = 'after_newline';
         opts.preserve_newlines = false;
-        
-        // comprehensive, but simple
         bt(
             'var res = a + b - c / d * e % f;\n' +
             'var res = g & h | i ^ j;\n' +
             'var res = (k && l || m) ? n : o;\n' +
             'var res = p >> q << r >>> s;\n' +
-            'var res = t === u !== v != w == x >= y <= z > aa < bb;',
-            'var res = a\n' +
-            '    + b\n' +
-            '    - c\n' +
-            '    / d\n' +
-            '    * e\n' +
-            '    % f;\n' +
-            'var res = g\n' +
-            '    & h\n' +
-            '    | i\n' +
-            '    ^ j;\n' +
-            'var res = (k\n' +
-            '        && l\n' +
-            '        || m)\n' +
-            '    ? n\n' +
-            '    : o;\n' +
+            'var res = t === u !== v != w == x >= y <= z > aa < ab;\n' +
+            'ac + -ad');
+        bt(
+            'var res = a + b\n' +
+            '- c /\n' +
+            'd  *     e\n' +
+            '%\n' +
+            'f;\n' +
+            '   var res = g & h\n' +
+            '| i ^\n' +
+            'j;\n' +
+            'var res = (k &&\n' +
+            'l\n' +
+            '|| m) ?\n' +
+            'n\n' +
+            ': o\n' +
+            ';\n' +
             'var res = p\n' +
-            '    >> q\n' +
-            '    << r\n' +
-            '    >>> s;\n' +
-            'var res = t\n' +
-            '    === u\n' +
-            '    !== v\n' +
-            '    != w\n' +
-            '    == x\n' +
-            '    >= y\n' +
-            '    <= z\n' +
-            '    > aa\n' +
-            '    < bb;');
+            '>> q <<\n' +
+            'r\n' +
+            '>>> s;\n' +
+            'var res\n' +
+            '  = t\n' +
+            '\n' +
+            ' === u !== v\n' +
+            ' !=\n' +
+            'w\n' +
+            '== x >=\n' +
+            'y <= z > aa <\n' +
+            'ab;\n' +
+            'ac +\n' +
+            '-ad',
+            'var res = a + b - c / d * e % f;\n' +
+            'var res = g & h | i ^ j;\n' +
+            'var res = (k && l || m) ? n : o;\n' +
+            'var res = p >> q << r >>> s;\n' +
+            'var res = t === u !== v != w == x >= y <= z > aa < ab;\n' +
+            'ac + -ad');
+    
+        // operator_position option - ensure no neswlines if preserve_newlines is false - ()
+        opts.operator_position = 'preserve_newline';
+        opts.preserve_newlines = false;
+        bt(
+            'var res = a + b - c / d * e % f;\n' +
+            'var res = g & h | i ^ j;\n' +
+            'var res = (k && l || m) ? n : o;\n' +
+            'var res = p >> q << r >>> s;\n' +
+            'var res = t === u !== v != w == x >= y <= z > aa < ab;\n' +
+            'ac + -ad');
+        bt(
+            'var res = a + b\n' +
+            '- c /\n' +
+            'd  *     e\n' +
+            '%\n' +
+            'f;\n' +
+            '   var res = g & h\n' +
+            '| i ^\n' +
+            'j;\n' +
+            'var res = (k &&\n' +
+            'l\n' +
+            '|| m) ?\n' +
+            'n\n' +
+            ': o\n' +
+            ';\n' +
+            'var res = p\n' +
+            '>> q <<\n' +
+            'r\n' +
+            '>>> s;\n' +
+            'var res\n' +
+            '  = t\n' +
+            '\n' +
+            ' === u !== v\n' +
+            ' !=\n' +
+            'w\n' +
+            '== x >=\n' +
+            'y <= z > aa <\n' +
+            'ab;\n' +
+            'ac +\n' +
+            '-ad',
+            'var res = a + b - c / d * e % f;\n' +
+            'var res = g & h | i ^ j;\n' +
+            'var res = (k && l || m) ? n : o;\n' +
+            'var res = p >> q << r >>> s;\n' +
+            'var res = t === u !== v != w == x >= y <= z > aa < ab;\n' +
+            'ac + -ad');
+    
+
+
+        // reset preserve_newlines and operator_position
+        opts.preserve_newlines = true;
+        opts.operator_position = 'before_newline';
+
+
+
+        // operator_position option - set to 'before_newline' (default value)
         
         // comprehensive, various newlines
         bt(
@@ -804,51 +607,49 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
             'w\n' +
             '== x >=\n' +
             'y <= z > aa <\n' +
-            'bb;',
-            'var res = a\n' +
-            '    + b\n' +
-            '    - c\n' +
-            '    / d\n' +
-            '    * e\n' +
-            '    % f;\n' +
-            'var res = g\n' +
-            '    & h\n' +
-            '    | i\n' +
-            '    ^ j;\n' +
-            'var res = (k\n' +
-            '        && l\n' +
-            '        || m)\n' +
-            '    ? n\n' +
-            '    : o;\n' +
-            'var res = p\n' +
-            '    >> q\n' +
-            '    << r\n' +
-            '    >>> s;\n' +
+            'ab;\n' +
+            'ac +\n' +
+            '-ad',
+            'var res = a + b - c /\n' +
+            '    d * e %\n' +
+            '    f;\n' +
+            'var res = g & h | i ^\n' +
+            '    j;\n' +
+            'var res = (k &&\n' +
+            '        l || m) ?\n' +
+            '    n : o;\n' +
+            'var res = p >> q <<\n' +
+            '    r >>> s;\n' +
             'var res = t\n' +
-            '    === u\n' +
-            '    !== v\n' +
-            '    != w\n' +
-            '    == x\n' +
-            '    >= y\n' +
-            '    <= z\n' +
-            '    > aa\n' +
-            '    < bb;');
+            '\n' +
+            '    === u !== v !=\n' +
+            '    w == x >=\n' +
+            '    y <= z > aa <\n' +
+            '    ab;\n' +
+            'ac +\n' +
+            '    -ad');
         
-        // handle colon special case
+        // colon special case
         bt(
             'var a = {\n' +
             '    b\n' +
             ': bval,\n' +
-            '    c: cval\n' +
+            '    c:\n' +
+            'cval\n' +
+            '    ,d: dval\n' +
             '};\n' +
-            'var d = e ? f : g;',
+            'var e = f ? g\n' +
+            ': h;\n' +
+            'var i = j ? k :\n' +
+            'l;',
             'var a = {\n' +
             '    b: bval,\n' +
-            '    c: cval\n' +
+            '    c: cval,\n' +
+            '    d: dval\n' +
             '};\n' +
-            'var d = e\n' +
-            '    ? f\n' +
-            '    : g;');
+            'var e = f ? g : h;\n' +
+            'var i = j ? k :\n' +
+            '    l;');
         
         // catch-all, includes brackets and other various code
         bt(
@@ -864,69 +665,132 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
             '} else if (!(complex && simple) ||\n' +
             '    (emotion && emotion.name === "happy")) {\n' +
             '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
+            '        anOcean\n' +
+            '        || aRiver);\n' +
             '}',
             'var d = 1;\n' +
-            'if (a\n' +
-            '    === b\n' +
+            'if (a === b && c) {\n' +
+            '    d = (c * everything / something_else) %\n' +
+            '        b;\n' +
+            '    e\n' +
+            '        += d;\n' +
+            '\n' +
+            '} else if (!(complex && simple) ||\n' +
+            '    (emotion && emotion.name === "happy")) {\n' +
+            '    cryTearsOfJoy(many ||\n' +
+            '        anOcean || aRiver);\n' +
+            '}');
+
+
+
+        // operator_position option - set to 'after_newline'
+        opts.operator_position = 'after_newline';
+        
+        // comprehensive, various newlines
+        bt(
+            'var res = a + b\n' +
+            '- c /\n' +
+            'd  *     e\n' +
+            '%\n' +
+            'f;\n' +
+            '   var res = g & h\n' +
+            '| i ^\n' +
+            'j;\n' +
+            'var res = (k &&\n' +
+            'l\n' +
+            '|| m) ?\n' +
+            'n\n' +
+            ': o\n' +
+            ';\n' +
+            'var res = p\n' +
+            '>> q <<\n' +
+            'r\n' +
+            '>>> s;\n' +
+            'var res\n' +
+            '  = t\n' +
+            '\n' +
+            ' === u !== v\n' +
+            ' !=\n' +
+            'w\n' +
+            '== x >=\n' +
+            'y <= z > aa <\n' +
+            'ab;\n' +
+            'ac +\n' +
+            '-ad',
+            'var res = a + b\n' +
+            '    - c / d * e\n' +
+            '    % f;\n' +
+            'var res = g & h\n' +
+            '    | i ^ j;\n' +
+            'var res = (k && l\n' +
+            '        || m) ? n\n' +
+            '    : o;\n' +
+            'var res = p\n' +
+            '    >> q << r\n' +
+            '    >>> s;\n' +
+            'var res = t\n' +
+            '\n' +
+            '    === u !== v\n' +
+            '    != w\n' +
+            '    == x >= y <= z > aa < ab;\n' +
+            'ac + -ad');
+        
+        // colon special case
+        bt(
+            'var a = {\n' +
+            '    b\n' +
+            ': bval,\n' +
+            '    c:\n' +
+            'cval\n' +
+            '    ,d: dval\n' +
+            '};\n' +
+            'var e = f ? g\n' +
+            ': h;\n' +
+            'var i = j ? k :\n' +
+            'l;',
+            'var a = {\n' +
+            '    b: bval,\n' +
+            '    c: cval,\n' +
+            '    d: dval\n' +
+            '};\n' +
+            'var e = f ? g\n' +
+            '    : h;\n' +
+            'var i = j ? k : l;');
+        
+        // catch-all, includes brackets and other various code
+        bt(
+            'var d = 1;\n' +
+            'if (a === b\n' +
             '    && c) {\n' +
-            '    d = (c\n' +
-            '            * everything\n' +
-            '            / something_else)\n' +
-            '        % b;\n' +
-            '    e += d;\n' +
-            '} else if (!(complex\n' +
-            '        && simple)\n' +
-            '    || (emotion\n' +
-            '        && emotion.name\n' +
-            '        === "happy")) {\n' +
-            '    cryTearsOfJoy(many\n' +
-            '        || anOcean\n' +
+            '    d = (c * everything\n' +
+            '            / something_else) %\n' +
+            '        b;\n' +
+            '    e\n' +
+            '        += d;\n' +
+            '\n' +
+            '} else if (!(complex && simple) ||\n' +
+            '    (emotion && emotion.name === "happy")) {\n' +
+            '    cryTearsOfJoy(many ||\n' +
+            '        anOcean\n' +
+            '        || aRiver);\n' +
+            '}',
+            'var d = 1;\n' +
+            'if (a === b\n' +
+            '    && c) {\n' +
+            '    d = (c * everything\n' +
+            '        / something_else) % b;\n' +
+            '    e\n' +
+            '        += d;\n' +
+            '\n' +
+            '} else if (!(complex && simple) || (emotion && emotion.name === "happy")) {\n' +
+            '    cryTearsOfJoy(many || anOcean\n' +
             '        || aRiver);\n' +
             '}');
 
 
 
-        // operator_position option - set to after_newline
-        opts.operator_position = 'after_newline';
-        opts.preserve_newlines = true;
-        
-        // comprehensive, but simple
-        bt(
-            'var res = a + b - c / d * e % f;\n' +
-            'var res = g & h | i ^ j;\n' +
-            'var res = (k && l || m) ? n : o;\n' +
-            'var res = p >> q << r >>> s;\n' +
-            'var res = t === u !== v != w == x >= y <= z > aa < bb;',
-            'var res = a\n' +
-            '    + b\n' +
-            '    - c\n' +
-            '    / d\n' +
-            '    * e\n' +
-            '    % f;\n' +
-            'var res = g\n' +
-            '    & h\n' +
-            '    | i\n' +
-            '    ^ j;\n' +
-            'var res = (k\n' +
-            '        && l\n' +
-            '        || m)\n' +
-            '    ? n\n' +
-            '    : o;\n' +
-            'var res = p\n' +
-            '    >> q\n' +
-            '    << r\n' +
-            '    >>> s;\n' +
-            'var res = t\n' +
-            '    === u\n' +
-            '    !== v\n' +
-            '    != w\n' +
-            '    == x\n' +
-            '    >= y\n' +
-            '    <= z\n' +
-            '    > aa\n' +
-            '    < bb;');
+        // operator_position option - set to 'preserve_newline'
+        opts.operator_position = 'preserve_newline';
         
         // comprehensive, various newlines
         bt(
@@ -956,61 +820,59 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
             'w\n' +
             '== x >=\n' +
             'y <= z > aa <\n' +
-            'bb;',
-            'var res = a\n' +
-            '    + b\n' +
-            '    - c\n' +
-            '    /\n' +
-            '    d\n' +
-            '    * e\n' +
+            'ab;\n' +
+            'ac +\n' +
+            '-ad',
+            'var res = a + b\n' +
+            '    - c /\n' +
+            '    d * e\n' +
             '    %\n' +
             '    f;\n' +
-            'var res = g\n' +
-            '    & h\n' +
-            '    | i\n' +
-            '    ^\n' +
+            'var res = g & h\n' +
+            '    | i ^\n' +
             '    j;\n' +
-            'var res = (k\n' +
-            '        &&\n' +
+            'var res = (k &&\n' +
             '        l\n' +
-            '        || m)\n' +
-            '    ?\n' +
+            '        || m) ?\n' +
             '    n\n' +
             '    : o;\n' +
             'var res = p\n' +
-            '    >> q\n' +
-            '    <<\n' +
+            '    >> q <<\n' +
             '    r\n' +
             '    >>> s;\n' +
             'var res = t\n' +
             '\n' +
-            '    === u\n' +
-            '    !== v\n' +
+            '    === u !== v\n' +
             '    !=\n' +
             '    w\n' +
-            '    == x\n' +
-            '    >=\n' +
-            '    y\n' +
-            '    <= z\n' +
-            '    > aa\n' +
-            '    <\n' +
-            '    bb;');
+            '    == x >=\n' +
+            '    y <= z > aa <\n' +
+            '    ab;\n' +
+            'ac +\n' +
+            '    -ad');
         
-        // handle colon special case
+        // colon special case
         bt(
             'var a = {\n' +
             '    b\n' +
             ': bval,\n' +
-            '    c: cval\n' +
+            '    c:\n' +
+            'cval\n' +
+            '    ,d: dval\n' +
             '};\n' +
-            'var d = e ? f : g;',
+            'var e = f ? g\n' +
+            ': h;\n' +
+            'var i = j ? k :\n' +
+            'l;',
             'var a = {\n' +
             '    b: bval,\n' +
-            '    c: cval\n' +
+            '    c: cval,\n' +
+            '    d: dval\n' +
             '};\n' +
-            'var d = e\n' +
-            '    ? f\n' +
-            '    : g;');
+            'var e = f ? g\n' +
+            '    : h;\n' +
+            'var i = j ? k :\n' +
+            '    l;');
         
         // catch-all, includes brackets and other various code
         bt(
@@ -1026,633 +888,14 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
             '} else if (!(complex && simple) ||\n' +
             '    (emotion && emotion.name === "happy")) {\n' +
             '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}',
-            'var d = 1;\n' +
-            'if (a\n' +
-            '    === b\n' +
-            '    && c) {\n' +
-            '    d = (c\n' +
-            '            * everything\n' +
-            '            / something_else)\n' +
-            '        %\n' +
-            '        b;\n' +
-            '    e\n' +
-            '        += d;\n' +
-            '\n' +
-            '} else if (!(complex\n' +
-            '        && simple)\n' +
-            '    ||\n' +
-            '    (emotion\n' +
-            '        && emotion.name\n' +
-            '        === "happy")) {\n' +
-            '    cryTearsOfJoy(many\n' +
-            '        ||\n' +
             '        anOcean\n' +
-            '        ||\n' +
-            '        aRiver);\n' +
+            '        || aRiver);\n' +
             '}');
 
 
 
-        // operator_position option - set to preserve_newline
-        opts.operator_position = 'preserve_newline';
-        opts.preserve_newlines = false;
-        
-        // comprehensive, but simple
-        bt(
-            'var res = a + b - c / d * e % f;\n' +
-            'var res = g & h | i ^ j;\n' +
-            'var res = (k && l || m) ? n : o;\n' +
-            'var res = p >> q << r >>> s;\n' +
-            'var res = t === u !== v != w == x >= y <= z > aa < bb;');
-        
-        // comprehensive, various newlines
-        bt(
-            'var res = a + b\n' +
-            '- c /\n' +
-            'd  *     e\n' +
-            '%\n' +
-            'f;\n' +
-            '   var res = g & h\n' +
-            '| i ^\n' +
-            'j;\n' +
-            'var res = (k &&\n' +
-            'l\n' +
-            '|| m) ?\n' +
-            'n\n' +
-            ': o\n' +
-            ';\n' +
-            'var res = p\n' +
-            '>> q <<\n' +
-            'r\n' +
-            '>>> s;\n' +
-            'var res\n' +
-            '  = t\n' +
-            '\n' +
-            ' === u !== v\n' +
-            ' !=\n' +
-            'w\n' +
-            '== x >=\n' +
-            'y <= z > aa <\n' +
-            'bb;',
-            'var res = a + b\n' +
-            '    - c /\n' +
-            '    d * e\n' +
-            '    %\n' +
-            '    f;\n' +
-            'var res = g & h\n' +
-            '    | i ^\n' +
-            '    j;\n' +
-            'var res = (k &&\n' +
-            '        l\n' +
-            '        || m) ?\n' +
-            '    n\n' +
-            '    : o;\n' +
-            'var res = p\n' +
-            '    >> q <<\n' +
-            '    r\n' +
-            '    >>> s;\n' +
-            'var res = t\n' +
-            '    === u !== v\n' +
-            '    !=\n' +
-            '    w\n' +
-            '    == x >=\n' +
-            '    y <= z > aa <\n' +
-            '    bb;');
-        
-        // handle colon special case
-        bt(
-            'var a = {\n' +
-            '    b\n' +
-            ': bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;',
-            'var a = {\n' +
-            '    b: bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;');
-        
-        // catch-all, includes brackets and other various code
-        bt(
-            'var d = 1;\n' +
-            'if (a === b\n' +
-            '    && c) {\n' +
-            '    d = (c * everything\n' +
-            '            / something_else) %\n' +
-            '        b;\n' +
-            '    e\n' +
-            '        += d;\n' +
-            '\n' +
-            '} else if (!(complex && simple) ||\n' +
-            '    (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}',
-            'var d = 1;\n' +
-            'if (a === b\n' +
-            '    && c) {\n' +
-            '    d = (c * everything\n' +
-            '            / something_else) %\n' +
-            '        b;\n' +
-            '    e += d;\n' +
-            '} else if (!(complex && simple) ||\n' +
-            '    (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}');
-
-
-
-        // operator_position option - set to preserve_newline
-        opts.operator_position = 'preserve_newline';
-        opts.preserve_newlines = true;
-        
-        // comprehensive, but simple
-        bt(
-            'var res = a + b - c / d * e % f;\n' +
-            'var res = g & h | i ^ j;\n' +
-            'var res = (k && l || m) ? n : o;\n' +
-            'var res = p >> q << r >>> s;\n' +
-            'var res = t === u !== v != w == x >= y <= z > aa < bb;');
-        
-        // comprehensive, various newlines
-        bt(
-            'var res = a + b\n' +
-            '- c /\n' +
-            'd  *     e\n' +
-            '%\n' +
-            'f;\n' +
-            '   var res = g & h\n' +
-            '| i ^\n' +
-            'j;\n' +
-            'var res = (k &&\n' +
-            'l\n' +
-            '|| m) ?\n' +
-            'n\n' +
-            ': o\n' +
-            ';\n' +
-            'var res = p\n' +
-            '>> q <<\n' +
-            'r\n' +
-            '>>> s;\n' +
-            'var res\n' +
-            '  = t\n' +
-            '\n' +
-            ' === u !== v\n' +
-            ' !=\n' +
-            'w\n' +
-            '== x >=\n' +
-            'y <= z > aa <\n' +
-            'bb;',
-            'var res = a + b\n' +
-            '    - c /\n' +
-            '    d * e\n' +
-            '    %\n' +
-            '    f;\n' +
-            'var res = g & h\n' +
-            '    | i ^\n' +
-            '    j;\n' +
-            'var res = (k &&\n' +
-            '        l\n' +
-            '        || m) ?\n' +
-            '    n\n' +
-            '    : o;\n' +
-            'var res = p\n' +
-            '    >> q <<\n' +
-            '    r\n' +
-            '    >>> s;\n' +
-            'var res = t\n' +
-            '\n' +
-            '    === u !== v\n' +
-            '    !=\n' +
-            '    w\n' +
-            '    == x >=\n' +
-            '    y <= z > aa <\n' +
-            '    bb;');
-        
-        // handle colon special case
-        bt(
-            'var a = {\n' +
-            '    b\n' +
-            ': bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;',
-            'var a = {\n' +
-            '    b: bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;');
-        
-        // catch-all, includes brackets and other various code
-        bt(
-            'var d = 1;\n' +
-            'if (a === b\n' +
-            '    && c) {\n' +
-            '    d = (c * everything\n' +
-            '            / something_else) %\n' +
-            '        b;\n' +
-            '    e\n' +
-            '        += d;\n' +
-            '\n' +
-            '} else if (!(complex && simple) ||\n' +
-            '    (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}');
-
-
-
-        // operator_position option - set to preserve_newline
-        opts.operator_position = 'remove_newline';
-        opts.preserve_newlines = false;
-        
-        // comprehensive, but simple
-        bt(
-            'var res = a + b - c / d * e % f;\n' +
-            'var res = g & h | i ^ j;\n' +
-            'var res = (k && l || m) ? n : o;\n' +
-            'var res = p >> q << r >>> s;\n' +
-            'var res = t === u !== v != w == x >= y <= z > aa < bb;');
-        
-        // comprehensive, various newlines
-        bt(
-            'var res = a + b\n' +
-            '- c /\n' +
-            'd  *     e\n' +
-            '%\n' +
-            'f;\n' +
-            '   var res = g & h\n' +
-            '| i ^\n' +
-            'j;\n' +
-            'var res = (k &&\n' +
-            'l\n' +
-            '|| m) ?\n' +
-            'n\n' +
-            ': o\n' +
-            ';\n' +
-            'var res = p\n' +
-            '>> q <<\n' +
-            'r\n' +
-            '>>> s;\n' +
-            'var res\n' +
-            '  = t\n' +
-            '\n' +
-            ' === u !== v\n' +
-            ' !=\n' +
-            'w\n' +
-            '== x >=\n' +
-            'y <= z > aa <\n' +
-            'bb;',
-            'var res = a + b - c / d * e % f;\n' +
-            'var res = g & h | i ^ j;\n' +
-            'var res = (k && l || m) ? n : o;\n' +
-            'var res = p >> q << r >>> s;\n' +
-            'var res = t === u !== v != w == x >= y <= z > aa < bb;');
-        
-        // handle colon special case
-        bt(
-            'var a = {\n' +
-            '    b\n' +
-            ': bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;',
-            'var a = {\n' +
-            '    b: bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;');
-        
-        // catch-all, includes brackets and other various code
-        bt(
-            'var d = 1;\n' +
-            'if (a === b\n' +
-            '    && c) {\n' +
-            '    d = (c * everything\n' +
-            '            / something_else) %\n' +
-            '        b;\n' +
-            '    e\n' +
-            '        += d;\n' +
-            '\n' +
-            '} else if (!(complex && simple) ||\n' +
-            '    (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}',
-            'var d = 1;\n' +
-            'if (a === b && c) {\n' +
-            '    d = (c * everything / something_else) % b;\n' +
-            '    e += d;\n' +
-            '} else if (!(complex && simple) || (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many || anOcean || aRiver);\n' +
-            '}');
-
-
-
-        // operator_position option - set to preserve_newline
-        opts.operator_position = 'remove_newline';
-        opts.preserve_newlines = true;
-        
-        // comprehensive, but simple
-        bt(
-            'var res = a + b - c / d * e % f;\n' +
-            'var res = g & h | i ^ j;\n' +
-            'var res = (k && l || m) ? n : o;\n' +
-            'var res = p >> q << r >>> s;\n' +
-            'var res = t === u !== v != w == x >= y <= z > aa < bb;');
-        
-        // comprehensive, various newlines
-        bt(
-            'var res = a + b\n' +
-            '- c /\n' +
-            'd  *     e\n' +
-            '%\n' +
-            'f;\n' +
-            '   var res = g & h\n' +
-            '| i ^\n' +
-            'j;\n' +
-            'var res = (k &&\n' +
-            'l\n' +
-            '|| m) ?\n' +
-            'n\n' +
-            ': o\n' +
-            ';\n' +
-            'var res = p\n' +
-            '>> q <<\n' +
-            'r\n' +
-            '>>> s;\n' +
-            'var res\n' +
-            '  = t\n' +
-            '\n' +
-            ' === u !== v\n' +
-            ' !=\n' +
-            'w\n' +
-            '== x >=\n' +
-            'y <= z > aa <\n' +
-            'bb;',
-            'var res = a + b - c /\n' +
-            '    d * e %\n' +
-            '    f;\n' +
-            'var res = g & h | i ^\n' +
-            '    j;\n' +
-            'var res = (k &&\n' +
-            '        l || m) ?\n' +
-            '    n : o;\n' +
-            'var res = p >> q <<\n' +
-            '    r >>> s;\n' +
-            'var res = t\n' +
-            '\n' +
-            '    === u !== v !=\n' +
-            '    w == x >=\n' +
-            '    y <= z > aa <\n' +
-            '    bb;');
-        
-        // handle colon special case
-        bt(
-            'var a = {\n' +
-            '    b\n' +
-            ': bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;',
-            'var a = {\n' +
-            '    b: bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;');
-        
-        // catch-all, includes brackets and other various code
-        bt(
-            'var d = 1;\n' +
-            'if (a === b\n' +
-            '    && c) {\n' +
-            '    d = (c * everything\n' +
-            '            / something_else) %\n' +
-            '        b;\n' +
-            '    e\n' +
-            '        += d;\n' +
-            '\n' +
-            '} else if (!(complex && simple) ||\n' +
-            '    (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}',
-            'var d = 1;\n' +
-            'if (a === b && c) {\n' +
-            '    d = (c * everything / something_else) %\n' +
-            '        b;\n' +
-            '    e\n' +
-            '        += d;\n' +
-            '\n' +
-            '} else if (!(complex && simple) ||\n' +
-            '    (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}');
-
-
-
-        // operator_position option - set to default (undefined)
-        opts.operator_position = undefined;
-        opts.preserve_newlines = false;
-        
-        // comprehensive, but simple
-        bt(
-            'var res = a + b - c / d * e % f;\n' +
-            'var res = g & h | i ^ j;\n' +
-            'var res = (k && l || m) ? n : o;\n' +
-            'var res = p >> q << r >>> s;\n' +
-            'var res = t === u !== v != w == x >= y <= z > aa < bb;');
-        
-        // comprehensive, various newlines
-        bt(
-            'var res = a + b\n' +
-            '- c /\n' +
-            'd  *     e\n' +
-            '%\n' +
-            'f;\n' +
-            '   var res = g & h\n' +
-            '| i ^\n' +
-            'j;\n' +
-            'var res = (k &&\n' +
-            'l\n' +
-            '|| m) ?\n' +
-            'n\n' +
-            ': o\n' +
-            ';\n' +
-            'var res = p\n' +
-            '>> q <<\n' +
-            'r\n' +
-            '>>> s;\n' +
-            'var res\n' +
-            '  = t\n' +
-            '\n' +
-            ' === u !== v\n' +
-            ' !=\n' +
-            'w\n' +
-            '== x >=\n' +
-            'y <= z > aa <\n' +
-            'bb;',
-            'var res = a + b - c / d * e % f;\n' +
-            'var res = g & h | i ^ j;\n' +
-            'var res = (k && l || m) ? n : o;\n' +
-            'var res = p >> q << r >>> s;\n' +
-            'var res = t === u !== v != w == x >= y <= z > aa < bb;');
-        
-        // catch-all, includes brackets and other various code
-        bt(
-            'var a = {\n' +
-            '    b\n' +
-            ': bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;',
-            'var a = {\n' +
-            '    b: bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;');
-        
-        // handle colon special case
-        bt(
-            'var d = 1;\n' +
-            'if (a === b\n' +
-            '    && c) {\n' +
-            '    d = (c * everything\n' +
-            '            / something_else) %\n' +
-            '        b;\n' +
-            '    e\n' +
-            '        += d;\n' +
-            '\n' +
-            '} else if (!(complex && simple) ||\n' +
-            '    (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}',
-            'var d = 1;\n' +
-            'if (a === b && c) {\n' +
-            '    d = (c * everything / something_else) % b;\n' +
-            '    e += d;\n' +
-            '} else if (!(complex && simple) || (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many || anOcean || aRiver);\n' +
-            '}');
-
-
-
-        // operator_position option - set to default (undefined)
-        opts.operator_position = undefined;
-        opts.preserve_newlines = true;
-        
-        // comprehensive, but simple
-        bt(
-            'var res = a + b - c / d * e % f;\n' +
-            'var res = g & h | i ^ j;\n' +
-            'var res = (k && l || m) ? n : o;\n' +
-            'var res = p >> q << r >>> s;\n' +
-            'var res = t === u !== v != w == x >= y <= z > aa < bb;');
-        
-        // comprehensive, various newlines
-        bt(
-            'var res = a + b\n' +
-            '- c /\n' +
-            'd  *     e\n' +
-            '%\n' +
-            'f;\n' +
-            '   var res = g & h\n' +
-            '| i ^\n' +
-            'j;\n' +
-            'var res = (k &&\n' +
-            'l\n' +
-            '|| m) ?\n' +
-            'n\n' +
-            ': o\n' +
-            ';\n' +
-            'var res = p\n' +
-            '>> q <<\n' +
-            'r\n' +
-            '>>> s;\n' +
-            'var res\n' +
-            '  = t\n' +
-            '\n' +
-            ' === u !== v\n' +
-            ' !=\n' +
-            'w\n' +
-            '== x >=\n' +
-            'y <= z > aa <\n' +
-            'bb;',
-            'var res = a + b - c /\n' +
-            '    d * e %\n' +
-            '    f;\n' +
-            'var res = g & h | i ^\n' +
-            '    j;\n' +
-            'var res = (k &&\n' +
-            '        l || m) ?\n' +
-            '    n : o;\n' +
-            'var res = p >> q <<\n' +
-            '    r >>> s;\n' +
-            'var res = t\n' +
-            '\n' +
-            '    === u !== v !=\n' +
-            '    w == x >=\n' +
-            '    y <= z > aa <\n' +
-            '    bb;');
-        
-        // catch-all, includes brackets and other various code
-        bt(
-            'var a = {\n' +
-            '    b\n' +
-            ': bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;',
-            'var a = {\n' +
-            '    b: bval,\n' +
-            '    c: cval\n' +
-            '};\n' +
-            'var d = e ? f : g;');
-        
-        // handle colon special case
-        bt(
-            'var d = 1;\n' +
-            'if (a === b\n' +
-            '    && c) {\n' +
-            '    d = (c * everything\n' +
-            '            / something_else) %\n' +
-            '        b;\n' +
-            '    e\n' +
-            '        += d;\n' +
-            '\n' +
-            '} else if (!(complex && simple) ||\n' +
-            '    (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}',
-            'var d = 1;\n' +
-            'if (a === b && c) {\n' +
-            '    d = (c * everything / something_else) %\n' +
-            '        b;\n' +
-            '    e\n' +
-            '        += d;\n' +
-            '\n' +
-            '} else if (!(complex && simple) ||\n' +
-            '    (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many ||\n' +
-            '        anOcean ||\n' +
-            '        aRiver);\n' +
-            '}');
+        // reset operator_position
+        opts.operator_position = 'before_newline';
 
 
 

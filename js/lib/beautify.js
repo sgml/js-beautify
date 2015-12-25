@@ -84,6 +84,23 @@
 
 */
 
+// Object.keys polyfill found here:
+// http://tokenposts.blogspot.com.au/2012/04/javascript-objectkeys-browser.html
+if (!Object.keys) {
+    Object.keys = function(o) {
+        if (o !== Object(o)) {
+          throw new TypeError('Object.keys called on a non-object');
+        }
+        var k=[],p;
+        for (p in o) {
+          if (Object.prototype.hasOwnProperty.call(o,p)) {
+            k.push(p);
+          }
+        }
+        return k;
+    };
+}
+
 (function() {
 
     var acorn = {};
@@ -178,25 +195,27 @@
         var beautifier = new Beautifier(js_source_text, options);
         return beautifier.beautify();
     }
-    
-    function verifyOperatorPosition(opPosition) {
-        var validPositionValues = [undefined];
-        Object.keys(OPERATOR_POSITION).forEach(function(pos) {
-            validPositionValues.push(OPERATOR_POSITION[pos]);
-        });
-        
-        if (!in_array(opPosition, validPositionValues)) {
+
+    function sanitizeOperatorPosition(opPosition) {
+        opPosition = (typeof opPosition !== 'undefined')
+          ? opPosition
+          : OPERATOR_POSITION.before_newline;
+
+        var validPositionValues = ['undefined'].concat(Object.keys(OPERATOR_POSITION));
+
+        if (!OPERATOR_POSITION[opPosition]) {
             throw new Error("Invalid Option Value: The option 'operator_position' must be one of the following values\n"
                 + validPositionValues
-                + "\nYou passed in '" + opPosition + "'");
+                + "\nYou passed in: '" + opPosition + "'");
         }
+
+        return opPosition;
     }
-    
+
     var OPERATOR_POSITION = {
         before_newline: 'before_newline',
         after_newline: 'after_newline',
         preserve_newline: 'preserve_newline',
-        remove_newline: 'remove_newline'
     };
     var OP_POSITION_OPERATORS = ['>>>', '===', '!==', '!=', '==', '>=', '<=', '>>', '<<', '&&', '||', '>', '<', '+', '-', '*', '/', '%', '&', '|', '^', '?', ':'];
 
@@ -309,10 +328,7 @@
         opt.e4x = (options.e4x === undefined) ? false : options.e4x;
         opt.end_with_newline = (options.end_with_newline === undefined) ? false : options.end_with_newline;
         opt.comma_first = (options.comma_first === undefined) ? false : options.comma_first;
-        opt.operator_position = options.operator_position;
-        
-        // throws error if invalid value was passed in
-        verifyOperatorPosition(opt.operator_position);
+        opt.operator_position = sanitizeOperatorPosition(options.operator_position);
 
         // For testing of beautify ignore:start directive
         opt.test_output_raw = (options.test_output_raw === undefined) ? false : options.test_output_raw;
@@ -465,11 +481,20 @@
                 return
             }
 
-            var shouldPreserveOperatorNewline = (opt.operator_position === OPERATOR_POSITION.preserve_newline) &&
-                in_array(flags.last_text, OP_POSITION_OPERATORS) ||
-                in_array(current_token.text, OP_POSITION_OPERATORS);
-                
-            if (((opt.preserve_newlines || shouldPreserveOperatorNewline) && current_token.wanted_newline) || force_linewrap) {
+            var shouldPreserveOrForce = (opt.preserve_newlines && current_token.wanted_newline) || force_linewrap;
+            var operatorLogicApplies = in_array(flags.last_text, OP_POSITION_OPERATORS) || in_array(current_token.text, OP_POSITION_OPERATORS);
+
+            if (operatorLogicApplies) {
+              var beforeAndPreserve = [OPERATOR_POSITION.before_newline, OPERATOR_POSITION.preserve_newline];
+              var shouldPrintOperatorNewline = (
+                  in_array(flags.last_text, OP_POSITION_OPERATORS) &&
+                  in_array(opt.operator_position, beforeAndPreserve)
+                )
+                || in_array(current_token.text, OP_POSITION_OPERATORS);
+              shouldPreserveOrForce = shouldPreserveOrForce && shouldPrintOperatorNewline;
+            }
+
+            if (shouldPreserveOrForce) {
                 print_newline(false, true);
             } else if (opt.wrap_line_length) {
                 if (last_type === 'TK_RESERVED' && in_array(flags.last_text, newline_restricted_tokens)) {
@@ -1220,6 +1245,13 @@
                 return;
             }
 
+            // Allow line wrapping between operators when operator_position is
+            //   set to before or preserve
+            var beforeAndPreserve = [OPERATOR_POSITION.before_newline, OPERATOR_POSITION.preserve_newline];
+            if (last_type === 'TK_OPERATOR' && in_array(opt.operator_position, beforeAndPreserve)) {
+                allow_wrap_or_preserved_newline();
+            }
+
             if (current_token.text === ':' && flags.in_case) {
                 flags.case_body = true;
                 indent();
@@ -1228,11 +1260,17 @@
                 flags.in_case = false;
                 return;
             }
-            
+
             var space_before = true;
             var space_after = true;
             var in_ternary = false;
-                
+            var isGeneratorAsterisk = current_token.text === '*' && last_type === 'TK_RESERVED' && flags.last_text === 'function';
+            var isUnary = in_array(current_token.text, ['-', '+']) && (
+                in_array(last_type, ['TK_START_BLOCK', 'TK_START_EXPR', 'TK_EQUALS', 'TK_OPERATOR']) ||
+                in_array(flags.last_text, Tokenizer.line_starters) ||
+                flags.last_text === ','
+              );
+
             if (current_token.text === ':') {
                 if (flags.ternary_depth === 0) {
                     // Colon is invalid javascript outside of ternary and object, but do our best to guess what was meant.
@@ -1244,50 +1282,30 @@
             } else if (current_token.text === '?') {
                 flags.ternary_depth += 1;
             }
-            
+
             // let's handle the operator_position option prior to any conflicting logic
-            if (typeof opt.operator_position !== 'undefined' && in_array(current_token.text, OP_POSITION_OPERATORS)) {
+            if (!isUnary && !isGeneratorAsterisk && opt.preserve_newlines && in_array(current_token.text, OP_POSITION_OPERATORS)) {
                 var isColon = current_token.text === ':';
                 var isTernaryColon = (isColon && in_ternary);
                 var isOtherColon = (isColon && !in_ternary);
-                
+
                 switch (opt.operator_position) {
-                    case OPERATOR_POSITION.preserve_newline:
-                        if (!isOtherColon) {
-                            allow_wrap_or_preserved_newline();
-                        }
-                        
-                        // if we just added a newline, or the current token is : and it's not a ternary statement,
-                        //   then we set space_before to false
-                        space_before = !(output.just_added_newline() || isOtherColon);
-                        
-                        output.space_before_token = space_before
-                        print_token();
-                        output.space_before_token = true;
-                        return;
-                        break;
-                        
                     case OPERATOR_POSITION.before_newline:
                         // if the current token is : and it's not a ternary statement then we set space_before to false
                         output.space_before_token = !isOtherColon;
-                                          
+
                         print_token();
-                        
-                        // if the current token is anything but colon, or (via deduction) it's a colon and in a ternary statement,
-                        //   then print a newline.
-                        if (!isColon || isTernaryColon) {
-                            print_newline(false, true);
-                        } else {
-                            output.space_before_token = true;
-                        }
+                        output.space_before_token = true;
                         return;
-                        break;
-                        
+
                     case OPERATOR_POSITION.after_newline:
                         // if the current token is anything but colon, or (via deduction) it's a colon and in a ternary statement,
                         //   then print a newline.
+
+                        output.space_before_token = true;
+
                         if (!isColon || isTernaryColon) {
-                            print_newline(false, true);
+                            allow_wrap_or_preserved_newline();
                         } else {
                             output.space_before_token = false;
                         }
@@ -1296,27 +1314,24 @@
 
                         output.space_before_token = true;
                         return;
-                        break;
-                        
-                    case OPERATOR_POSITION.remove_newline:
-                        // if the current token is a colon and not in a ternary statement,
-                        //   then don't output a space before the token.
-                        output.space_before_token = !isOtherColon;
 
+                    case OPERATOR_POSITION.preserve_newline:
+                        if (!isOtherColon) {
+                            allow_wrap_or_preserved_newline();
+                        }
+
+                        // if we just added a newline, or the current token is : and it's not a ternary statement,
+                        //   then we set space_before to false
+                        space_before = !(output.just_added_newline() || isOtherColon);
+
+                        output.space_before_token = space_before;
                         print_token();
-
                         output.space_before_token = true;
                         return;
-                        break;
                 }
             }
 
-            // Allow line wrapping between operators
-            if (last_type === 'TK_OPERATOR') {
-                allow_wrap_or_preserved_newline();
-            }
-
-            if (in_array(current_token.text, ['--', '++', '!', '~']) || (in_array(current_token.text, ['-', '+']) && (in_array(last_type, ['TK_START_BLOCK', 'TK_START_EXPR', 'TK_EQUALS', 'TK_OPERATOR']) || in_array(flags.last_text, Tokenizer.line_starters) || flags.last_text === ','))) {
+            if (in_array(current_token.text, ['--', '++', '!', '~']) || isUnary) {
                 // unary operators (and binary +/- pretending to be unary) special cases
 
                 space_before = false;
@@ -1358,7 +1373,7 @@
                     // foo(); --bar;
                     print_newline();
                 }
-            } else if (current_token.text === '*' && last_type === 'TK_RESERVED' && flags.last_text === 'function') {
+            } else if (isGeneratorAsterisk) {
                 space_before = false;
                 space_after = false;
             }
@@ -2270,7 +2285,6 @@
             }
             return out;
         }
-
     }
 
 

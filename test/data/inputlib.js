@@ -7,14 +7,15 @@
 
 var ops = ['>', '<', '+', '-', '*', '/', '%', '&', '|', '^', '?', ':'];
 var operator_position = {
-    comprehensive_simple: [
+    sanity: [
         'var res = a + b - c / d * e % f;',
         'var res = g & h | i ^ j;',
         'var res = (k && l || m) ? n : o;',
         'var res = p >> q << r >>> s;',
-        'var res = t === u !== v != w == x >= y <= z > aa < bb;'
+        'var res = t === u !== v != w == x >= y <= z > aa < ab;',
+        'ac + -ad'
     ],
-    comprehensive_newlines: [
+    comprehensive: [
         'var res = a + b',
         '- c /',
         'd  *     e',
@@ -41,15 +42,22 @@ var operator_position = {
         'w',
         '== x >=',
         'y <= z > aa <',
-        'bb;'
+        'ab;',
+        'ac +',
+        '-ad'
     ],
     colon_special_case: [
         'var a = {',
         '    b',
         ': bval,',
-        '    c: cval',
+        '    c:',
+        'cval',
+        '    ,d: dval',
         '};',
-        'var d = e ? f : g;'
+        'var e = f ? g',
+        ': h;',
+        'var i = j ? k :',
+        'l;'
     ],
     catch_all: [
         'var d = 1;',
@@ -64,8 +72,8 @@ var operator_position = {
         '} else if (!(complex && simple) ||',
         '    (emotion && emotion.name === "happy")) {',
         '    cryTearsOfJoy(many ||',
-        '        anOcean ||',
-        '        aRiver);',
+        '        anOcean',
+        '        || aRiver);',
         '}'
     ]
 };
