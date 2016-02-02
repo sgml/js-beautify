@@ -1295,6 +1295,11 @@ if (!Object.keys) {
                         output.space_before_token = !isOtherColon;
 
                         print_token();
+
+                        if (!isColon || isTernaryColon) {
+                            allow_wrap_or_preserved_newline();
+                        }
+
                         output.space_before_token = true;
                         return;
 
@@ -1305,7 +1310,11 @@ if (!Object.keys) {
                         output.space_before_token = true;
 
                         if (!isColon || isTernaryColon) {
-                            allow_wrap_or_preserved_newline();
+                            if (get_token(1).wanted_newline) {
+                                print_newline(false, true);
+                            } else {
+                                allow_wrap_or_preserved_newline();
+                            }
                         } else {
                             output.space_before_token = false;
                         }

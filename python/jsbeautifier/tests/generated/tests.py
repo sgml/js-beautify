@@ -39,6 +39,7 @@ class TestJSBeautifier(unittest.TestCase):
         default_options.jslint_happy = false
         default_options.keep_array_indentation = false
         default_options.brace_style = 'collapse'
+        default_options.operator_position = 'before_newline'
 
         cls.default_options = default_options
         cls.wrapregex = re.compile('^(.+)$', re.MULTILINE)
@@ -85,7 +86,6 @@ class TestJSBeautifier(unittest.TestCase):
         def unicode_char(value):
             return six.unichr(value)
 
-        self.options.operator_position = 'before_newline'
 
         self.reset_options();
         #============================================================
@@ -327,6 +327,7 @@ class TestJSBeautifier(unittest.TestCase):
 
         self.reset_options();
         #============================================================
+        # operator_position option - ensure no neswlines if preserve_newlines is false - ()
         self.options.operator_position = 'before_newline'
         self.options.preserve_newlines = false
         bt(
@@ -467,10 +468,16 @@ class TestJSBeautifier(unittest.TestCase):
             'var res = t === u !== v != w == x >= y <= z > aa < ab;\n' +
             'ac + -ad')
 
+
+        self.reset_options();
+        #============================================================
         # reset preserve_newlines and operator_position
         self.options.preserve_newlines = true
         self.options.operator_position = 'before_newline'
 
+
+        self.reset_options();
+        #============================================================
         # operator_position option - set to 'before_newline' (default value)
         
         # comprehensive, various newlines
@@ -504,20 +511,28 @@ class TestJSBeautifier(unittest.TestCase):
             'ab;\n' +
             'ac +\n' +
             '-ad',
-            'var res = a + b - c /\n' +
+            'var res = a + b -\n' +
+            '    c /\n' +
             '    d * e %\n' +
             '    f;\n' +
-            'var res = g & h | i ^\n' +
+            'var res = g & h |\n' +
+            '    i ^\n' +
             '    j;\n' +
             'var res = (k &&\n' +
-            '        l || m) ?\n' +
-            '    n : o;\n' +
-            'var res = p >> q <<\n' +
-            '    r >>> s;\n' +
+            '        l ||\n' +
+            '        m) ?\n' +
+            '    n :\n' +
+            '    o;\n' +
+            'var res = p >>\n' +
+            '    q <<\n' +
+            '    r >>>\n' +
+            '    s;\n' +
             'var res = t\n' +
             '\n' +
-            '    === u !== v !=\n' +
-            '    w == x >=\n' +
+            '    ===\n' +
+            '    u !== v !=\n' +
+            '    w ==\n' +
+            '    x >=\n' +
             '    y <= z > aa <\n' +
             '    ab;\n' +
             'ac +\n' +
@@ -541,7 +556,8 @@ class TestJSBeautifier(unittest.TestCase):
             '    c: cval,\n' +
             '    d: dval\n' +
             '};\n' +
-            'var e = f ? g : h;\n' +
+            'var e = f ? g :\n' +
+            '    h;\n' +
             'var i = j ? k :\n' +
             '    l;')
         
@@ -563,8 +579,10 @@ class TestJSBeautifier(unittest.TestCase):
             '        || aRiver);\n' +
             '}',
             'var d = 1;\n' +
-            'if (a === b && c) {\n' +
-            '    d = (c * everything / something_else) %\n' +
+            'if (a === b &&\n' +
+            '    c) {\n' +
+            '    d = (c * everything /\n' +
+            '            something_else) %\n' +
             '        b;\n' +
             '    e\n' +
             '        += d;\n' +
@@ -572,9 +590,13 @@ class TestJSBeautifier(unittest.TestCase):
             '} else if (!(complex && simple) ||\n' +
             '    (emotion && emotion.name === "happy")) {\n' +
             '    cryTearsOfJoy(many ||\n' +
-            '        anOcean || aRiver);\n' +
+            '        anOcean ||\n' +
+            '        aRiver);\n' +
             '}')
 
+
+        self.reset_options();
+        #============================================================
         # operator_position option - set to 'after_newline'
         self.options.operator_position = 'after_newline'
         
@@ -610,22 +632,30 @@ class TestJSBeautifier(unittest.TestCase):
             'ac +\n' +
             '-ad',
             'var res = a + b\n' +
-            '    - c / d * e\n' +
+            '    - c\n' +
+            '    / d * e\n' +
             '    % f;\n' +
             'var res = g & h\n' +
-            '    | i ^ j;\n' +
-            'var res = (k && l\n' +
-            '        || m) ? n\n' +
+            '    | i\n' +
+            '    ^ j;\n' +
+            'var res = (k\n' +
+            '        && l\n' +
+            '        || m)\n' +
+            '    ? n\n' +
             '    : o;\n' +
             'var res = p\n' +
-            '    >> q << r\n' +
+            '    >> q\n' +
+            '    << r\n' +
             '    >>> s;\n' +
             'var res = t\n' +
             '\n' +
             '    === u !== v\n' +
             '    != w\n' +
-            '    == x >= y <= z > aa < ab;\n' +
-            'ac + -ad')
+            '    == x\n' +
+            '    >= y <= z > aa\n' +
+            '    < ab;\n' +
+            'ac\n' +
+            '    + -ad')
         
         # colon special case
         bt(
@@ -647,7 +677,8 @@ class TestJSBeautifier(unittest.TestCase):
             '};\n' +
             'var e = f ? g\n' +
             '    : h;\n' +
-            'var i = j ? k : l;')
+            'var i = j ? k\n' +
+            '    : l;')
         
         # catch-all, includes brackets and other various code
         bt(
@@ -670,15 +701,21 @@ class TestJSBeautifier(unittest.TestCase):
             'if (a === b\n' +
             '    && c) {\n' +
             '    d = (c * everything\n' +
-            '        / something_else) % b;\n' +
+            '            / something_else)\n' +
+            '        % b;\n' +
             '    e\n' +
             '        += d;\n' +
             '\n' +
-            '} else if (!(complex && simple) || (emotion && emotion.name === "happy")) {\n' +
-            '    cryTearsOfJoy(many || anOcean\n' +
+            '} else if (!(complex && simple)\n' +
+            '    || (emotion && emotion.name === "happy")) {\n' +
+            '    cryTearsOfJoy(many\n' +
+            '        || anOcean\n' +
             '        || aRiver);\n' +
             '}')
 
+
+        self.reset_options();
+        #============================================================
         # operator_position option - set to 'preserve_newline'
         self.options.operator_position = 'preserve_newline'
         
@@ -782,9 +819,15 @@ class TestJSBeautifier(unittest.TestCase):
             '        || aRiver);\n' +
             '}')
 
+
+        self.reset_options();
+        #============================================================
         # reset operator_position
         self.options.operator_position = 'before_newline'
 
+
+        self.reset_options();
+        #============================================================
         # New Test Suite
 
 
