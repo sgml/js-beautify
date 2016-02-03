@@ -84,17 +84,17 @@
 
 */
 
-// Object.keys polyfill found here:
+// Object.values polyfill found here:
 // http://tokenposts.blogspot.com.au/2012/04/javascript-objectkeys-browser.html
-if (!Object.keys) {
-    Object.keys = function(o) {
+if (!Object.values) {
+    Object.values = function(o) {
         if (o !== Object(o)) {
-          throw new TypeError('Object.keys called on a non-object');
+          throw new TypeError('Object.values called on a non-object');
         }
         var k=[],p;
         for (p in o) {
           if (Object.prototype.hasOwnProperty.call(o,p)) {
-            k.push(p);
+            k.push(o[p]);
           }
         }
         return k;
@@ -197,13 +197,11 @@ if (!Object.keys) {
     }
 
     function sanitizeOperatorPosition(opPosition) {
-        opPosition = (typeof opPosition !== 'undefined')
-          ? opPosition
-          : OPERATOR_POSITION.before_newline;
+        opPosition = opPosition || OPERATOR_POSITION.before_newline;
 
-        var validPositionValues = ['undefined'].concat(Object.keys(OPERATOR_POSITION));
+        var validPositionValues = Object.values(OPERATOR_POSITION);
 
-        if (!OPERATOR_POSITION[opPosition]) {
+        if (!in_array(opPosition, validPositionValues)) {
             throw new Error("Invalid Option Value: The option 'operator_position' must be one of the following values\n"
                 + validPositionValues
                 + "\nYou passed in: '" + opPosition + "'");
@@ -213,11 +211,12 @@ if (!Object.keys) {
     }
 
     var OPERATOR_POSITION = {
-        before_newline: 'before_newline',
-        after_newline: 'after_newline',
-        preserve_newline: 'preserve_newline',
+        before_newline: 'before-newline',
+        after_newline: 'after-newline',
+        preserve_newline: 'preserve-newline',
     };
-    var OP_POSITION_OPERATORS = ['>>>', '===', '!==', '!=', '==', '>=', '<=', '>>', '<<', '&&', '||', '>', '<', '+', '-', '*', '/', '%', '&', '|', '^', '?', ':'];
+
+    var OPERATOR_POSITION_BEFORE_OR_PRESERVE = [OPERATOR_POSITION.before_newline, OPERATOR_POSITION.preserve_newline];
 
     var MODE = {
             BlockStatement: 'BlockStatement', // 'BLOCK'
@@ -482,15 +481,14 @@ if (!Object.keys) {
             }
 
             var shouldPreserveOrForce = (opt.preserve_newlines && current_token.wanted_newline) || force_linewrap;
-            var operatorLogicApplies = in_array(flags.last_text, OP_POSITION_OPERATORS) || in_array(current_token.text, OP_POSITION_OPERATORS);
+            var operatorLogicApplies = in_array(flags.last_text, Tokenizer.positionable_operators) || in_array(current_token.text, Tokenizer.positionable_operators);
 
             if (operatorLogicApplies) {
-              var beforeAndPreserve = [OPERATOR_POSITION.before_newline, OPERATOR_POSITION.preserve_newline];
               var shouldPrintOperatorNewline = (
-                  in_array(flags.last_text, OP_POSITION_OPERATORS) &&
-                  in_array(opt.operator_position, beforeAndPreserve)
+                  in_array(flags.last_text, Tokenizer.positionable_operators) &&
+                  in_array(opt.operator_position, OPERATOR_POSITION_BEFORE_OR_PRESERVE)
                 )
-                || in_array(current_token.text, OP_POSITION_OPERATORS);
+                || in_array(current_token.text, Tokenizer.positionable_operators);
               shouldPreserveOrForce = shouldPreserveOrForce && shouldPrintOperatorNewline;
             }
 
@@ -1247,8 +1245,7 @@ if (!Object.keys) {
 
             // Allow line wrapping between operators when operator_position is
             //   set to before or preserve
-            var beforeAndPreserve = [OPERATOR_POSITION.before_newline, OPERATOR_POSITION.preserve_newline];
-            if (last_type === 'TK_OPERATOR' && in_array(opt.operator_position, beforeAndPreserve)) {
+            if (last_type === 'TK_OPERATOR' && in_array(opt.operator_position, OPERATOR_POSITION_BEFORE_OR_PRESERVE)) {
                 allow_wrap_or_preserved_newline();
             }
 
@@ -1284,7 +1281,7 @@ if (!Object.keys) {
             }
 
             // let's handle the operator_position option prior to any conflicting logic
-            if (!isUnary && !isGeneratorAsterisk && opt.preserve_newlines && in_array(current_token.text, OP_POSITION_OPERATORS)) {
+            if (!isUnary && !isGeneratorAsterisk && opt.preserve_newlines && in_array(current_token.text, Tokenizer.positionable_operators)) {
                 var isColon = current_token.text === ':';
                 var isTernaryColon = (isColon && in_ternary);
                 var isOtherColon = (isColon && !in_ternary);
@@ -1730,7 +1727,11 @@ if (!Object.keys) {
         var digit_oct = /[01234567]/;
         var digit_hex = /[0123456789abcdefABCDEF]/;
 
-        var punct = ('+ - * / % & ++ -- = += -= *= /= %= == === != !== > < >= <= >> << >>> >>>= >>= <<= && &= | || ! ~ , : ? ^ ^= |= :: => **').split(' ');
+        this.positionable_operators = '!= !== % & && * ** + - / : < << <= == === > >= >> >>> ? ^ | ||'.split(' ')
+        var punct = this.positionable_operators.concat(
+            // non-positionable operators - these do not follow operator position settings
+            '! %= &= *= ++ += , -- /= :: <<= = => >>= >>>= ^= |= ~'.split(' '))
+
         // words which should always start on new line.
         this.line_starters = 'continue,try,throw,return,var,let,const,if,switch,case,default,for,while,break,function,import,export'.split(',');
         var reserved_words = this.line_starters.concat(['do', 'in', 'else', 'get', 'set', 'new', 'catch', 'finally', 'typeof', 'yield', 'async', 'await', 'from', 'as']);

@@ -28,7 +28,7 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
     default_opts.jslint_happy = false;
     default_opts.keep_array_indentation = false;
     default_opts.brace_style = 'collapse';
-    default_opts.operator_position = 'before_newline';
+    default_opts.operator_position = 'before-newline';
 
     function reset_options()
     {
@@ -502,7 +502,7 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
         reset_options();
         //============================================================
         // operator_position option - ensure no neswlines if preserve_newlines is false - ()
-        opts.operator_position = 'before_newline';
+        opts.operator_position = 'before-newline';
         opts.preserve_newlines = false;
         bt(
             'var res = a + b - c / d * e % f;\n' +
@@ -549,7 +549,7 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
             'ac + -ad');
 
         // operator_position option - ensure no neswlines if preserve_newlines is false - ()
-        opts.operator_position = 'after_newline';
+        opts.operator_position = 'after-newline';
         opts.preserve_newlines = false;
         bt(
             'var res = a + b - c / d * e % f;\n' +
@@ -596,7 +596,7 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
             'ac + -ad');
 
         // operator_position option - ensure no neswlines if preserve_newlines is false - ()
-        opts.operator_position = 'preserve_newline';
+        opts.operator_position = 'preserve-newline';
         opts.preserve_newlines = false;
         bt(
             'var res = a + b - c / d * e % f;\n' +
@@ -645,14 +645,7 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
 
         reset_options();
         //============================================================
-        // reset preserve_newlines and operator_position
-        opts.preserve_newlines = true;
-        opts.operator_position = 'before_newline';
-
-
-        reset_options();
-        //============================================================
-        // operator_position option - set to 'before_newline' (default value)
+        // operator_position option - set to 'before-newline' (default value)
         
         // comprehensive, various newlines
         bt(
@@ -772,7 +765,7 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
         reset_options();
         //============================================================
         // operator_position option - set to 'after_newline'
-        opts.operator_position = 'after_newline';
+        opts.operator_position = 'after-newline';
         
         // comprehensive, various newlines
         bt(
@@ -890,8 +883,8 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
 
         reset_options();
         //============================================================
-        // operator_position option - set to 'preserve_newline'
-        opts.operator_position = 'preserve_newline';
+        // operator_position option - set to 'preserve-newline'
+        opts.operator_position = 'preserve-newline';
         
         // comprehensive, various newlines
         bt(
@@ -992,12 +985,6 @@ function run_javascript_tests(test_obj, Urlencoded, js_beautify, html_beautify, 
             '        anOcean\n' +
             '        || aRiver);\n' +
             '}');
-
-
-        reset_options();
-        //============================================================
-        // reset operator_position
-        opts.operator_position = 'before_newline';
 
 
         reset_options();

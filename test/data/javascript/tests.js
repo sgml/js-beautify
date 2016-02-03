@@ -8,7 +8,7 @@ exports.test_data = {
         { name: "jslint_happy", value: "false" },
         { name: "keep_array_indentation", value: "false" },
         { name: "brace_style", value: "'collapse'" },
-        { name: "operator_position", value: "'before_newline'" }
+        { name: "operator_position", value: "'before-newline'" }
     ],
     groups: [{
         name: "Unicode Support",
@@ -323,17 +323,17 @@ exports.test_data = {
         matrix: [
             {
                 options: [
-                    { name: "operator_position", value: "'before_newline'" },
+                    { name: "operator_position", value: "'before-newline'" },
                     { name: "preserve_newlines", value: "false" }
                 ]
             }, {
                 options: [
-                    { name: "operator_position", value: "'after_newline'" },
+                    { name: "operator_position", value: "'after-newline'" },
                     { name: "preserve_newlines", value: "false" }
                 ]
             }, {
                 options: [
-                    { name: "operator_position", value: "'preserve_newline'" },
+                    { name: "operator_position", value: "'preserve-newline'" },
                     { name: "preserve_newlines", value: "false" }
                 ]
             }
@@ -347,13 +347,7 @@ exports.test_data = {
             }
         ]
     }, {
-        name: "reset preserve_newlines and operator_position",
-        options: [
-            { name: "preserve_newlines", value: "true" },
-            { name: "operator_position", value: "'before_newline'" }
-        ]
-    }, {
-        name: "operator_position option - set to 'before_newline' (default value)",
+        name: "operator_position option - set to 'before-newline' (default value)",
         tests: [
             {
                 comment: 'comprehensive, various newlines',
@@ -425,7 +419,7 @@ exports.test_data = {
     }, {
         name: "operator_position option - set to 'after_newline'",
         options: [{
-            name: "operator_position", value: "'after_newline'"
+            name: "operator_position", value: "'after-newline'"
         }],
         tests: [
             {
@@ -495,9 +489,9 @@ exports.test_data = {
             }
         ]
     }, {
-        name: "operator_position option - set to 'preserve_newline'",
+        name: "operator_position option - set to 'preserve-newline'",
         options: [{
-            name: "operator_position", value: "'preserve_newline'"
+            name: "operator_position", value: "'preserve-newline'"
         }],
         tests: [
             {
@@ -551,9 +545,6 @@ exports.test_data = {
                 unchanged: inputlib.operator_position.catch_all
             }
         ]
-    }, {
-        name: "reset operator_position",
-        options: [{ name: "operator_position", value: "'before_newline'" }]
     }, {
         name: "New Test Suite"
     },
