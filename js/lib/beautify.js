@@ -1117,7 +1117,12 @@ if (!Object.values) {
                 if (last_type === 'TK_RESERVED' && is_special_word(flags.last_text)) {
                     // no newline between 'return nnn'
                     output.space_before_token = true;
-                } else if (last_type !== 'TK_END_EXPR') {
+                } 
+                else if (last_type === 'TK_SEMICOLON' || last_type === 'TK_END_EXPR')
+                  {
+                    output.space_before_token = true;
+                  }
+                    else if (last_type !== 'TK_END_EXPR') {
                     if ((last_type !== 'TK_START_EXPR' || !(current_token.type === 'TK_RESERVED' && in_array(current_token.text, ['var', 'let', 'const']))) && flags.last_text !== ':') {
                         // no need to force newline on 'var': for (var x = 0...)
                         if (current_token.type === 'TK_RESERVED' && current_token.text === 'if' && flags.last_text === 'else') {
